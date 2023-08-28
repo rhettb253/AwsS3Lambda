@@ -1,6 +1,8 @@
 # AWS: S3 and Lambda
 
-AWS Lambda allows us to write code that is triggered in the cloud, without thinking about maintaining servers. This is practice integrating a Lambda Function.
+AWS Lambda allows us to write code that is triggered in the cloud, without thinking about maintaining servers. This is practice integrating a Lambda Function that updates a S3 bucket that stores a json array containing image metadata.
+
+#### [Link to images.json file in S3 bucket](https://awspracticebucketforthewin.s3.us-west-2.amazonaws.com/images.json)
 
 ## Before You Start
 
@@ -42,8 +44,14 @@ Make sure your IAM User has permissions 'AmazonS3FullAccess' & 'AWSLambda_FullAc
 - To create a trigger we:
   - clicked on triggers then hit the first dropdown and selected our S3 Bucket
   - for the Event Type dropdown we selected: All object create events
+  - we also added a .png suffix to so that we would only trigger the function when a .png file is uploaded
+    - this suffix was important for us to add because it should stop recursion from taking place and increasing our bill. Here's why:
+      - Our Lambda function is being triggered when an update happens in the corresponding S3 bucket.
+      - Our function is taking our images array out of the bucket and adding the newly uploaded .png images to the array.
+      - Then it puts the array back into the S3 bucket so that our bucket has a list of data on the images in the bucket.
+      - If we DIDN'T have our .png suffix then when we put our images array back into the bucket this would trigger another function call (recursively) and it would never stop. But because our images array has a .json suffix it does not trigger the Lambda function. <3
 
-- To grab our event data / important image meta data that we were supposed to store for this assignment we had to dig down into the event object.
+- To grab our event data / important image meta data (that we were supposed to store for this assignment) we had to dig down into the event object.
   The AWS event object will look somewhat like this: 
 
   {
@@ -88,4 +96,4 @@ Make sure your IAM User has permissions 'AmazonS3FullAccess' & 'AWSLambda_FullAc
 ]
 }
 
-  We needed to home into the 'Records' property 0th array index then into the 's3' property then farthur into the 'object' property to get the infor we were looking for.
+  We needed to dig into the 'Records' property 0th array index then into the 's3' property then farthur into the 'object' property to get the info we were looking for.
